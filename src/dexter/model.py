@@ -10,9 +10,15 @@ from openai import APIConnectionError
 
 from dexter.prompts import DEFAULT_SYSTEM_PROMPT
 
-# Initialize the OpenAI client
-# Make sure your OPENAI_API_KEY is set in your environment
-llm = ChatOpenAI(model="gpt-4.1", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
+# Global LLM instance
+llm = None
+
+def get_llm():
+    """Initializes and returns the LLM client, ensuring it's a singleton."""
+    global llm
+    if llm is None:
+        llm = ChatOpenAI(model="gpt-4.1", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
+    return llm
 
 def call_llm(
     prompt: str,
@@ -27,11 +33,12 @@ def call_llm(
       ("user", "{prompt}")
   ])
 
-  runnable = llm
+  llm_client = get_llm()
+  runnable = llm_client
   if output_schema:
-      runnable = llm.with_structured_output(output_schema, method="function_calling")
+      runnable = llm_client.with_structured_output(output_schema, method="function_calling")
   elif tools:
-      runnable = llm.bind_tools(tools)
+      runnable = llm_client.bind_tools(tools)
   
   chain = prompt_template | runnable
   

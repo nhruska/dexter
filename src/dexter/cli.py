@@ -4,13 +4,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from dexter.agent import Agent
+from dexter.tools import DEFAULT_TOOLS
 from dexter.utils.intro import print_intro
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
 
 def main():
     print_intro()
-    agent = Agent()
+    agent = Agent(tools=DEFAULT_TOOLS)
 
     # Create a prompt session with history support
     session = PromptSession(history=InMemoryHistory())
