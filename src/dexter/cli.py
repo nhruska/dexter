@@ -5,12 +5,10 @@ load_dotenv()
 
 from dexter.agent import Agent
 from dexter.tools import DEFAULT_TOOLS
-from dexter.utils.intro import print_intro
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
 
 def main():
-    print_intro()
     agent = Agent(tools=DEFAULT_TOOLS)
 
     # Create a prompt session with history support
@@ -20,12 +18,10 @@ def main():
         try:
             query = session.prompt(">> ")
             if query.lower() in ["exit", "quit"]:
-                print("Goodbye!")
                 break
             if query:
                 agent.run(query)
         except (KeyboardInterrupt, EOFError):
-            print("\nGoodbye!")
             break
 
 
