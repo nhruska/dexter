@@ -1,24 +1,17 @@
-# Dexter 🤖
+# Autonomous Research Agent
 
-Dexter is an autonomous financial research agent that thinks, plans, and learns as it works. It performs analysis using task planning, self-reflection, and real-time market data. Think Claude Code, but built specifically for financial research.
-
-
-<img width="979" height="651" alt="Screenshot 2025-10-14 at 6 12 35 PM" src="https://github.com/user-attachments/assets/5a2859d4-53cf-4638-998a-15cef3c98038" />
+This project provides a powerful and flexible autonomous agent that can be configured to perform a wide range of research tasks. By providing a custom set of tools, you can adapt the agent to any domain, from scientific research to data analysis.
 
 ## Overview
 
-Dexter takes complex financial questions and turns them into clear, step-by-step research plans. It runs those tasks using live market data, checks its own work, and refines the results until it has a confident, data-backed answer.  
-
-It’s not just another chatbot.  It’s an agent that plans ahead, verifies its progress, and keeps iterating until the job is done.
+This agent takes complex questions and turns them into clear, step-by-step research plans. It runs those tasks using a customizable toolset, checks its own work, and refines the results until it has a confident, data-backed answer.
 
 **Key Capabilities:**
-- **Intelligent Task Planning**: Automatically decomposes complex queries into structured research steps
-- **Autonomous Execution**: Selects and executes the right tools to gather financial data
-- **Self-Validation**: Checks its own work and iterates until tasks are complete
-- **Real-Time Financial Data**: Access to income statements, balance sheets, and cash flow statements
-- **Safety Features**: Built-in loop detection and step limits to prevent runaway execution
-
-[![Twitter Follow](https://img.shields.io/twitter/follow/virattt?style=social)](https://twitter.com/virattt)
+- **Intelligent Task Planning**: Automatically decomposes complex queries into structured research steps.
+- **Pluggable Tool Architecture**: Easily extend the agent's capabilities by adding new tools.
+- **Autonomous Execution**: Selects and executes the right tools to gather and process information.
+- **Self-Validation**: Checks its own work and iterates until tasks are complete.
+- **Safety Features**: Built-in loop detection and step limits to prevent runaway execution.
 
 ## Quick Start
 
@@ -27,103 +20,73 @@ It’s not just another chatbot.  It’s an agent that plans ahead, verifies its
 - Python 3.10 or higher
 - [uv](https://github.com/astral-sh/uv) package manager
 - OpenAI API key
-- Financial Datasets API key (get one at [financialdatasets.ai](https://financialdatasets.ai))
 
 ### Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/virattt/dexter.git
-cd dexter
-```
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/your-username/your-repo.git
+    cd your-repo
+    ```
 
-2. Install dependencies with uv:
-```bash
-uv sync
-```
+2.  Install dependencies with uv:
+    ```bash
+    uv sync
+    ```
 
-3. Set up your environment variables:
-```bash
-# Copy the example environment file
-cp env.example .env
+3.  Set up your environment variables:
+    ```bash
+    # Copy the example environment file
+    cp env.example .env
 
-# Edit .env and add your API keys
-# OPENAI_API_KEY=your-openai-api-key
-# FINANCIAL_DATASETS_API_KEY=your-financial-datasets-api-key
-```
+    # Edit .env and add your API key
+    # OPENAI_API_KEY=your-openai-api-key
+    ```
 
 ### Usage
 
-Run Dexter in interactive mode:
-```bash
-uv run dexter-agent
-```
+To run the agent, you'll need to create a toolset and pass it to the `Agent` class.
 
-### Example Queries
+**1. Create a Toolset**
 
-Try asking Dexter questions like:
-- "What was Apple's revenue growth over the last 4 quarters?"
-- "Compare Microsoft and Google's operating margins for 2023"
-- "Analyze Tesla's cash flow trends over the past year"
-- "What is Amazon's debt-to-equity ratio based on recent financials?"
-
-Dexter will automatically:
-1. Break down your question into research tasks
-2. Fetch the necessary financial data
-3. Perform calculations and analysis
-4. Provide a comprehensive, data-rich answer
-
-## Architecture
-
-Dexter uses a multi-agent architecture with specialized components:
-
-- **Planning Agent**: Analyzes queries and creates structured task lists
-- **Action Agent**: Selects appropriate tools and executes research steps
-- **Validation Agent**: Verifies task completion and data sufficiency
-- **Answer Agent**: Synthesizes findings into comprehensive responses
-
-## Project Structure
-
-```
-dexter/
-├── src/
-│   ├── dexter/
-│   │   ├── agent.py      # Main agent orchestration logic
-│   │   ├── model.py      # LLM interface
-│   │   ├── tools.py      # Financial data tools
-│   │   ├── prompts.py    # System prompts for each component
-│   │   ├── schemas.py    # Pydantic models
-│   │   ├── utils/        # Utility functions
-│   │   └── cli.py        # CLI entry point
-├── pyproject.toml
-└── uv.lock
-```
-
-## Configuration
-
-Dexter supports configuration via the `Agent` class initialization:
+Create a file named `my_tools.py` and define a list of tools:
 
 ```python
-from dexter.agent import Agent
+# my_tools.py
+from langchain.tools import tool
 
-agent = Agent(
-    max_steps=20,              # Global safety limit
-    max_steps_per_task=5       # Per-task iteration limit
-)
+@tool
+def search_web(query: str) -> str:
+    """Searches the web for the given query."""
+    # Your web search implementation here
+    return f"Search results for: {query}"
+
+my_tool_list = [search_web]
+```
+
+**2. Run the Agent**
+
+Now, create a script to run the agent with your custom toolset:
+
+```python
+# run_agent.py
+from dexter.agent import Agent
+from my_tools import my_tool_list
+
+# Initialize the agent with your toolset
+agent = Agent(tools=my_tool_list)
+
+# Run the agent with a query
+query = "What are the latest advancements in AI?"
+result = agent.run(query)
+
+print(result)
 ```
 
 ## How to Contribute
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-**Important**: Please keep your pull requests small and focused.  This will make it easier to review and merge.
-
-
-## License
-
-This project is licensed under the MIT License.
-
+1.  Fork the repository
+2.  Create a feature branch
+3.  Commit your changes
+4.  Push to the branch
+5.  Create a Pull Request
