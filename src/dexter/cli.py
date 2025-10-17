@@ -18,10 +18,12 @@ def main():
         try:
             query = session.prompt(">> ")
             if query.lower() in ["exit", "quit"]:
+                print("Goodbye!")
                 break
             if query:
                 agent.run(query)
         except (KeyboardInterrupt, EOFError):
+            print("\nGoodbye!")
             break
 
 

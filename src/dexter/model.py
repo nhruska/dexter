@@ -1,5 +1,4 @@
 import os
-import time
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from pydantic import BaseModel
@@ -8,14 +7,11 @@ from langchain_core.tools import BaseTool
 from langchain_core.messages import AIMessage
 from openai import APIConnectionError
 
-from openai import APIConnectionError
-
 from dexter.prompts import DEFAULT_SYSTEM_PROMPT
+from dexter.config import settings
 
 # Global LLM instance
 llm = None
-
-from dexter.config import settings
 
 def get_llm():
     """Initializes and returns the LLM client, ensuring it's a singleton."""
