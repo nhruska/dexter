@@ -21,11 +21,5 @@ dependencies = [
 [project.scripts]
 dexter-agent = "dexter.cli:main"
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=8.4.0",
-    "pytest-mock>=3.14.0",
-]
-
 [tool.setuptools.packages.find]
 where = ["src"]
