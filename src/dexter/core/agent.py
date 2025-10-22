@@ -1,23 +1,35 @@
-from typing import List
+from typing import List, Optional
 
 from langchain_core.messages import AIMessage
 
-from dexter.model import call_llm
-from dexter.prompts import (
+from dexter.core.model import call_llm
+from dexter.core.prompts import (
     ACTION_SYSTEM_PROMPT,
     ANSWER_SYSTEM_PROMPT,
     PLANNING_SYSTEM_PROMPT,
     TOOL_ARGS_SYSTEM_PROMPT,
     VALIDATION_SYSTEM_PROMPT,
 )
-from dexter.schemas import Answer, IsDone, OptimizedToolArgs, Task, TaskList
-from dexter.tools import TOOLS
+from dexter.core.schemas import Answer, IsDone, OptimizedToolArgs, Task, TaskList
+from dexter.verticals.base import VerticalConfig
 from dexter.utils.logger import Logger
 from dexter.utils.ui import show_progress
 
 
 class Agent:
-    def __init__(self, max_steps: int = 20, max_steps_per_task: int = 5):
+    def __init__(
+        self,
+        vertical: Optional[VerticalConfig] = None,
+        max_steps: int = 20,
+        max_steps_per_task: int = 5
+    ):
+        # Default to finance vertical for backwards compatibility
+        if vertical is None:
+            from dexter.verticals.finance import FINANCE_VERTICAL
+            vertical = FINANCE_VERTICAL
+
+        self.vertical = vertical
+        self.tools = vertical.tools
         self.logger = Logger()
         self.max_steps = max_steps            # global safety cap
         self.max_steps_per_task = max_steps_per_task
@@ -25,7 +37,7 @@ class Agent:
     # ---------- task planning ----------
     @show_progress("Planning tasks...", "Tasks planned")
     def plan_tasks(self, query: str) -> List[Task]:
-        tool_descriptions = "\n".join([f"- {t.name}: {t.description}" for t in TOOLS])
+        tool_descriptions = "\n".join([f"- {t.name}: {t.description}" for t in self.tools])
         prompt = f"""
         Given the user query: "{query}",
         Create a list of tasks to be completed.
@@ -54,7 +66,7 @@ class Agent:
         Based on the task and the outputs, what should be the next step?
         """
         try:
-            return call_llm(prompt, system_prompt=ACTION_SYSTEM_PROMPT, tools=TOOLS)
+            return call_llm(prompt, system_prompt=ACTION_SYSTEM_PROMPT, tools=self.tools)
         except Exception as e:
             self.logger._log(f"ask_for_actions failed: {e}")
             return AIMessage(content="Failed to get actions.")
@@ -78,7 +90,7 @@ class Agent:
     @show_progress("Optimizing tool call...", "")
     def optimize_tool_args(self, tool_name: str, initial_args: dict, task_desc: str) -> dict:
         """Optimize tool arguments based on task requirements."""
-        tool = next((t for t in TOOLS if t.name == tool_name), None)
+        tool = next((t for t in self.tools if t.name == tool_name), None)
         if not tool:
             return initial_args
         
@@ -204,7 +216,7 @@ class Agent:
                         return
                     
                     # Execute the tool.
-                    tool_to_run = next((t for t in TOOLS if t.name == tool_name), None)
+                    tool_to_run = next((t for t in self.tools if t.name == tool_name), None)
                     if tool_to_run and self.confirm_action(tool_name, str(optimized_args)):
                         try:
                             result = self._execute_tool(tool_to_run, tool_name, optimized_args)
